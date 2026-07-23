@@ -7,15 +7,30 @@ export default {
     try {
       const { question, plan } = await request.json();
 
-      // Validação simples para plano Free
-      if (plan === "free" && question.length > 200) {
+      // 🔹 Regras de plano
+      if (plan === "free") {
+        if (!question || question.length > 200) {
+          return new Response(
+            JSON.stringify({ error: "Plano Free permite perguntas curtas (até 200 caracteres)." }),
+            { status: 403, headers: { "Content-Type": "application/json" } }
+          );
+        }
+      } else if (plan === "premium") {
+        // Premium sem limite de caracteres
+        if (!question) {
+          return new Response(
+            JSON.stringify({ error: "Pergunta inválida." }),
+            { status: 400, headers: { "Content-Type": "application/json" } }
+          );
+        }
+      } else {
         return new Response(
-          JSON.stringify({ error: "Plano Free permite perguntas curtas." }),
-          { status: 403, headers: { "Content-Type": "application/json" } }
+          JSON.stringify({ error: "Plano não reconhecido. Use 'free' ou 'premium'." }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
         );
       }
 
-      // Chamada à OpenAI
+      // 🔹 Chamada à OpenAI
       const response = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
         headers: {
