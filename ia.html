@@ -88,4 +88,35 @@
   <script>
     async function sendToIA() {
       const question = document.getElementById("userQuestion").value;
-      const responseBox = document.get
+      const responseBox = document.getElementById("iaResponse");
+
+      if (question.trim() === "") {
+        responseBox.innerHTML = "<p style='color:#f87171;'>Por favor, digite uma pergunta antes de enviar.</p>";
+        return;
+      }
+
+      responseBox.innerHTML = "<p><em>Processando sua pergunta...</em></p>";
+
+      try {
+        const res = await fetch("https://vanthexrepo.vercel.app/ask", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question, plan: "free" }) // ou "premium"
+        });
+
+        const data = await res.json();
+
+        if (data.error) {
+          responseBox.innerHTML = "<p style='color:#f87171;'>Erro: " + data.error + "</p>";
+        } else {
+          responseBox.innerHTML = "<p><strong>Resposta da Vanthex IA:</strong> " + data.answer + "</p>";
+        }
+      } catch (error) {
+        responseBox.innerHTML = "<p style='color:#f87171;'>Erro ao conectar com o servidor.</p>";
+        console.error(error);
+      }
+    }
+  </script>
+
+</body>
+</html>
